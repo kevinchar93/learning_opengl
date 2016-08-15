@@ -9,23 +9,53 @@ int main() {
   if (!glfwInit())
     exit(EXIT_FAILURE);
 
-  // Create a GLFWwindow with our desired settings
+  /* -------------------------------------------------------------------------*/
+  // Create and init a opengl context in the form of a window
   int winWidth = 1024, winHeight = 768;
   GLFWwindow *window = nullptr;
   window = glfwCreateWindow(winWidth, winHeight, "glfw", NULL, NULL);
 
-  // Ensure window we created is valid
   if (!window) {
     glfwTerminate();
+    std::cout << "Window that was created is not valid !" << std::endl;
     exit(EXIT_FAILURE);
   }
-
-  // Make our created window the current context
   glfwMakeContextCurrent(window);
 
-  std::cout << "Hello world!" << std::endl;
+  /* -------------------------------------------------------------------------*/
+  // Now that our context exists we can init glew
+  glewExperimental = true; // flag helps prevent errors with modern opengl
+  GLenum glewError = glewInit();
+  if (glewError != GLEW_OK) {
+    std::cout << "glew init error: " << glewGetErrorString(glewError)
+              << std::endl;
+  }
 
-  // ------- MAIN LOOP -------------------------------------------------------
+  if (!GLEW_VERSION_2_1) {
+    std::cout << "OpenGL 2.1 not supported!" << std::endl;
+    return -1;
+  }
+
+  /* -------------------------------------------------------------------------*/
+  // Now that we know glew supports the version of opengl we want we can now
+  // query opengl
+  const GLubyte *glVersion = glGetString(GL_VERSION);
+  std::cout << "Graphics Driver: " << glVersion << std::endl;
+
+  const GLubyte *glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+  std::cout << "GLSL Version: " << glslVersion << std::endl;
+
+  // check for some specific funtionality
+  if (GLEW_ARB_vertex_array_object) {
+    std::cout << "genVertexArrays supported" << std::endl;
+  }
+
+  if (GLEW_APPLE_vertex_array_object) {
+    std::cout << "getVertexArrayAPPLE supported" << std::endl;
+  }
+
+  /* -------------------------------------------------------------------------*
+  // MAIN LOOP
   while (!glfwWindowShouldClose(window)) {
 
     glViewport(0, 0, winWidth, winHeight); // set view port in pixels
@@ -41,6 +71,8 @@ int main() {
   // Destroy the window and terminate glfw
   glfwDestroyWindow(window);
   glfwTerminate();
+
+  */
 
   return 0;
 }
