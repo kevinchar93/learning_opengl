@@ -4,43 +4,70 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-int main() {
-  // Attempt to init glfw fail if error
-  if (!glfwInit())
-    exit(EXIT_FAILURE);
+void key_callback(GLFWwindow* window, int key, int scancode, int action,
+    int mode);
 
-  // Create a GLFWwindow with our desired settings
-  int winWidth = 1024, winHeight = 768;
-  GLFWwindow *window = nullptr;
-  window = glfwCreateWindow(winWidth, winHeight, "glfw", NULL, NULL);
+const GLuint WIDTH = 800, HEIGHT = 600;
 
-  // Ensure window we created is valid
-  if (!window) {
+int main()
+{
+
+    // --------------------------------------------------------------------------------------------------
+    // init GLFW and set up all the settings for our window
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+    // create the window based on earlier settings & set it as the current context
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr);
+    if (window == nullptr) {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+
+    // set up the callbacks that are needed
+    glfwSetKeyCallback(window, key_callback);
+
+    // --------------------------------------------------------------------------------------------------
+    // init the glew library before we begin calling any opengl functions
+    glewExperimental = GL_TRUE; // so GLEW know to use modern approach for getting func ptrs & extensions
+    if (glewInit() != GLEW_OK) {
+        std::cout << "Failed to initialize GLEW" << std::endl;
+        return -1;
+    }
+
+    // set up the viewport that will will be rendering to
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    glViewport(0, 0, width, height);
+
+    // --------------------------------------------------------------------------------------------------
+    // the main rendering loop
+    while (!glfwWindowShouldClose(window)) {
+        // check and call events
+        glfwPollEvents();
+
+        // Rendering commangs here
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // swap the front and back buffer
+        glfwSwapBuffers(window);
+    }
+
+    // clean up any alloced resources
     glfwTerminate();
-    exit(EXIT_FAILURE);
-  }
+    return 0;
+}
 
-  // Make our created window the current context
-  glfwMakeContextCurrent(window);
-
-  std::cout << "Hello world!" << std::endl;
-
-  // ------- MAIN LOOP -------------------------------------------------------
-  while (!glfwWindowShouldClose(window)) {
-
-    glViewport(0, 0, winWidth, winHeight); // set view port in pixels
-    glClearColor(1, 0, 0, 1);              // clear window contents
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // put drawing code here
-
-    glfwSwapBuffers(window);
-    glfwPollEvents();
-  }
-
-  // Destroy the window and terminate glfw
-  glfwDestroyWindow(window);
-  glfwTerminate();
-
-  return 0;
+void key_callback(GLFWwindow* window, int key, int scanecode, int action, int mode)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, GL_TRUE);
+    }
 }
